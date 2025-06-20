@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apollo Console</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+    }
+    input {
+      display: block;
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.7rem;
+      background: #21211f;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #profile {
+      margin-top: 2rem;
+      background: #eef;
+      padding: 1rem;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+
+    <div id="profile" style="display: none">
+      <h3>Profile Info</h3>
+      <p id="profile-data"></p>
+    </div>
+  </div>
+
+  <script>
+    const apiURL = "https://apolloconsole-back.onrender.com"; // cambia si tu URL Render es distinta
+
+    async function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const res = await fetch(`${apiURL}/api/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        loadProfile();
+      } else {
+        alert("Login failed");
+      }
+    }
+
+    async function loadProfile() {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${apiURL}/api/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (data.email) {
+        document.getElementById("profile-data").innerText = JSON.stringify(data, null, 2);
+        document.getElementById("profile").style.display = "block";
+      } else {
+        alert("Token expired or invalid");
+      }
+    }
+  </script>
+</body>
+</html>
